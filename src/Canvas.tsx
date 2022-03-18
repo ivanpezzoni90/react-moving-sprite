@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import sprite from './maleWarriorSprite.png';
 
 const SCALE = 3;
@@ -40,17 +40,25 @@ function keyUpListener(event: any) {
 }
 
 function Canvas() {
+    const [imageLoaded, setImageLoaded] = useState(false);
+
     function loadImage() {
         img.src = sprite;
         img.onload = function() {
-          window.requestAnimationFrame(gameLoop);
+            setImageLoaded(true);
+            window.requestAnimationFrame(gameLoop);
         };
     }
 
     loadImage();
-    
-    let canvas = document.querySelector('canvas');
-    let ctx = canvas && canvas.getContext('2d');
+
+    let canvas;
+    let ctx: CanvasRenderingContext2D | null;
+
+    if (imageLoaded) {
+        canvas = document.querySelector('canvas');
+        ctx = canvas && canvas.getContext('2d');
+    }
 
     type drawFrameType = (fx: number, fy: number, cx: number, cy: number) => void;
     const drawFrame: drawFrameType = function(frameX, frameY, canvasX, canvasY) {
@@ -66,16 +74,15 @@ function Canvas() {
             SCALED_HEIGHT
         );
     }
-
+    
     const canvasWidth: number = (canvas && canvas.width) || 0;
     const canvasHeight: number = (canvas && canvas.height) || 0;
-
     function gameLoop() {
         ctx && ctx.clearRect(0, 0, canvasWidth, canvasHeight);
       
         let hasMoved = false;
       
-        // TODO: Separare gli if W/S e A/D per muovere diagonalmente
+        // Separate IFs between W/S and A/D to move character diagonally
         if (keyPresses.w) {
             moveCharacter(0, -MOVEMENT_SPEED, Directions.FACING_UP);
             hasMoved = true;
@@ -121,8 +128,12 @@ function Canvas() {
         }
         currentDirection = direction;
     }
+    
 
-    return <canvas width="900" height="600"></canvas>;
+    return (<canvas
+            width="900"
+            height="600"
+        />);
 }
 
 export default Canvas;
